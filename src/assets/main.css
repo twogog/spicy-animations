@@ -10,6 +10,7 @@ html {
 }
 
 body {
+  background: #000;
   cursor: url('./rocket-svgrepo-com.svg'), auto;
   font-size: 1.6rem;
 }
