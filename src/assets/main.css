@@ -1,0 +1,32 @@
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  cursor: url('./rocket-svgrepo-com.svg'), auto;
+  font-size: 1.6rem;
+}
+
+button {
+  cursor: url('./rocket-svgrepo-com.svg'), auto;
+}
+
+button:active {
+  opacity: 0.9;
+}
+
+.outer-wrapper {
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3rem;
+}
