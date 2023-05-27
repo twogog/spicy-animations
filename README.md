@@ -8,7 +8,7 @@ To practice Vue framework and whatever (pleasing to the eye) animation technique
 
 ## Build
 
-Check on Vercel https://gitfinder-azure.vercel.app/
+Check on Vercel https://spicy-animations.vercel.app/
 
 ## Stack
 - Vue (vite)
