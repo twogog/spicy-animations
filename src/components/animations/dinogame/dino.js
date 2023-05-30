@@ -2,7 +2,7 @@ import {getCustomProperty, incrementCustomProperty, setCustomProperty} from './h
 
 const FRAME_TIME = 100;
 const DINO_FRAME_COUNT = 2;
-const GRAVITY = 0.003;
+const GRAVITY = 0.0025;
 const JUMP_SPEED = 0.45;
 
 let isJumping

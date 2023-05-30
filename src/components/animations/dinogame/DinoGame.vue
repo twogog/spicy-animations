@@ -8,8 +8,11 @@
   
   import {updateGround, setupGround} from './ground'
   import {updateDino, setupDino} from './dino'
-  import { ref } from 'vue';
+  import {updateCactus, setupCactus} from './cactus'
 
+  import { ref } from 'vue';
+  
+  const playground = ref(null)
   const ground1 = ref(null)
   const ground2 = ref(null)
   const dino = ref(null)
@@ -31,6 +34,7 @@
     updateScore(delta)
     boostSpeed(delta)
     
+    updateCactus([playground.value, cactusImg], delta, speedScale)
     updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
     updateGround([ground1.value, ground2.value], delta, speedScale);
     lastTime = time;
@@ -51,6 +55,7 @@
     score.value = 0;
     hide.value = true;
     setupDino(dino)
+    setupCactus(dino)
     setupGround([ground1.value, ground2.value])
     window.requestAnimationFrame(update);
   }
@@ -58,7 +63,7 @@
 </script>
 
 <template>
-  <div class='dino-game'>
+  <div class='dino-game' ref="playground">
     <div class="score">{{ Math.floor(score) }}</div>
     <div v-if='!hide' class="start-screen" @click="startGame">Click Here To Start</div>
     <img ref='ground1' :src=groundImg class="ground">
@@ -66,6 +71,15 @@
     <img ref='dino' :src='dinoStatImg' class="dino">
   </div>
 </template>
+
+<style>
+  .cactus {
+  position: absolute;
+  left: calc(var(--left) * 1%);
+  height: 20%;
+  bottom: 5rem;
+  }
+</style>
 
 <style scoped>
 *, *::before, *::after {
@@ -105,11 +119,4 @@
   height: 20%;
   bottom: calc(var(--bottom) * 1%);
 }
-.cactus {
-  position: absolute;
-  left: calc(var(--left) * 1%);
-  height: 20%;
-  bottom: 5rem;
-}
-
 </style>
