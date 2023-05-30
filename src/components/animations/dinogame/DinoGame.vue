@@ -19,7 +19,7 @@
 
   let lastTime;
   let speedScale;
-  const SPEED_BOOST = .0000001;
+  const SPEED_BOOST = .00001;
 
   function update(time) {
     if(!lastTime) {
@@ -99,10 +99,11 @@
   left: calc(var(--left) * 1%);
 }
 .dino {
+  --bottom: 20;
   position: absolute;
   left: 1%;
   height: 20%;
-  bottom: 5rem;
+  bottom: calc(var(--bottom) * 1%);
 }
 .cactus {
   position: absolute;
