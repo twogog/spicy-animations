@@ -7,8 +7,8 @@
   import cactusImg from '../../../assets/dinoimgs/cactus.png'
   
   import {updateGround, setupGround} from './ground'
-  import {updateDino, setupDino} from './dino'
-  import {updateCactus, setupCactus} from './cactus'
+  import {updateDino, setupDino, getDinoRect} from './dino'
+  import {updateCactus, setupCactus, getCactusRects} from './cactus'
 
   import { ref } from 'vue';
   
@@ -37,6 +37,8 @@
     updateCactus([playground.value, cactusImg], delta, speedScale)
     updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
     updateGround([ground1.value, ground2.value], delta, speedScale);
+    if (checkLose(dino.value)) return handleLose(dino.value)
+    
     lastTime = time;
     window.requestAnimationFrame(update);
   }
@@ -58,6 +60,25 @@
     setupCactus(dino)
     setupGround([ground1.value, ground2.value])
     window.requestAnimationFrame(update);
+  }
+
+  function checkLose(dino) {
+    const dinoRect = getDinoRect(dino)
+    return getCactusRects().some(cactus => isCollision(cactus, dinoRect))
+  }
+
+  function isCollision(rect1, rect2) {
+    return (
+      rect1.left < rect2.right &&
+      rect1.top < rect2.bottom &&
+      rect1.right > rect2.left &&
+      rect1.bottom > rect2.top 
+    )
+  }
+
+  function handleLose(dino) {
+    dino.src = dinoLoseImg;
+    hide.value = false;
   }
 
 </script>

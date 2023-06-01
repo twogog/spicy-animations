@@ -1,6 +1,6 @@
 import {getCustomProperty, incrementCustomProperty, setCustomProperty} from './helpers.js'
 
-const SPEED = 0.05
+const SPEED = 0.08
 const CACTUS_MIN_INTERVAL = 1500;
 const CACTUS_MAX_INTERVAL = 2000;
 
@@ -36,4 +36,9 @@ function createCactus(playground, cactusImg) {
   cactus.classList.add('cactus');
   setCustomProperty(cactus, '--left', 100)
   playground.append(cactus);
+}
+
+export function getCactusRects() {
+  return [...document.querySelectorAll('.cactus')]
+    .map(cactus => cactus.getBoundingClientRect())
 }

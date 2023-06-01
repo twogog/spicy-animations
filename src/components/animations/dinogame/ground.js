@@ -1,6 +1,6 @@
 import {getCustomProperty, incrementCustomProperty, setCustomProperty} from './helpers.js'
 
-const SPEED = .05;
+const SPEED = 0.08;
 
 export function setupGround(grounds) {
   const [first, second] = grounds;
