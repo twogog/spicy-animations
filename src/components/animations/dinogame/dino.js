@@ -4,6 +4,7 @@ const FRAME_TIME = 100;
 const DINO_FRAME_COUNT = 2;
 const GRAVITY = 0.002;
 const JUMP_SPEED = 0.45;
+const isPhone = /android|iphone/i.test(navigator.userAgent)
 
 let isJumping
 let currentFrameTime
@@ -22,8 +23,14 @@ export function setupDino(dino) {
   currentFrameTime = 0;
   yVelocity = 0;
   setCustomProperty(dino.value, '--bottom', '20')
-  document.removeEventListener('keydown', onJump)
-  document.addEventListener('keydown', onJump)
+
+  if (isPhone) {
+    document.removeEventListener('ontouchstart', onJump)
+    document.addEventListener('ontouchstart', onJump)
+  } else {
+    document.removeEventListener('keydown', onJump)
+    document.addEventListener('keydown', onJump)
+  }
 }
 
 function handleRun(dinoElements, delta, speedScale) {
@@ -53,7 +60,7 @@ function handleJump(dino, delta) {
 }
 
 function onJump(e) {
-  if (e.code !== 'Space' || isJumping) return
+  if (!isPhone) if (e.code !== 'Space' && e.code !== 'ArrowUp' || isJumping) return
   isJumping = true; 
   yVelocity = JUMP_SPEED
 }
