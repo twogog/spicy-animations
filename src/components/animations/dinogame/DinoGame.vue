@@ -20,6 +20,37 @@
   const hide = ref(false);
   const score = ref(0);
 
+  const localRecord = (() => {
+    try {
+      const storageResult = localStorage.getItem('score-record');
+      if (storageResult) return storageResult
+      return 0;
+    } catch (error) {
+      console.warn(error)
+      alert('You need to share your localStorage for a consistent record writing');
+      return 0;
+    }
+  })()
+  
+  const record = ref(localRecord);
+  
+  function checkRecord() {
+    try {
+      const storageResult = localStorage.getItem('score-record');
+      if (storageResult) {  
+        score.value > storageResult
+          ? localStorage.setItem('score-record', JSON.stringify(score.value)) : ''
+          record.value = localStorage.getItem('score-record');
+      } else {
+        localStorage.setItem('score-record', JSON.stringify(score.value))
+        record.value = score.value;
+      }  
+    } catch (error) {
+      console.warn(error)
+      record.value < score.value ? record.value = score.value : ''
+    }
+  }
+
   let lastTime;
   let speedScale;
   const SPEED_BOOST = .00001;
@@ -77,6 +108,7 @@
   }
 
   function handleLose(dino) {
+    checkRecord()
     dino.src = dinoLoseImg;
     hide.value = false;
   }
@@ -85,8 +117,9 @@
 
 <template>
   <div class='dino-game' ref="playground">
-    <div class="score">{{ Math.floor(score) }}</div>
-    <div v-if='!hide' class="start-screen" @click="startGame">Click Here To Start</div>
+    <span class="record">Your record is: {{ Math.floor(record) }}</span>
+    <span class="score">{{ Math.floor(score) }}</span>
+    <p v-if='!hide' class="start-screen" @click="startGame">Click Here To Start</p>
     <img ref='ground1' :src=groundImg class="ground">
     <img ref='ground2' :src=groundImg class="ground">
     <img ref='dino' :src='dinoStatImg' class="dino">
@@ -112,7 +145,14 @@
   overflow: hidden;
   color: #fff;
 }
-
+.record {
+  position: absolute;
+  font-size: 2rem;
+  left: 50%;
+  top: 5%;
+  transform: translate(-50%);
+  width:max-content;
+}
 .score {
   position: absolute;
   bottom: 50%;
