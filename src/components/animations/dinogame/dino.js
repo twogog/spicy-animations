@@ -25,8 +25,8 @@ export function setupDino(dino) {
   setCustomProperty(dino.value, '--bottom', '20')
 
   if (isPhone) {
-    document.removeEventListener('ontouchstart', onJump)
-    document.addEventListener('ontouchstart', onJump)
+    document.removeEventListener('touchstart', onJump)
+    document.addEventListener('touchstart', onJump)
   } else {
     document.removeEventListener('keydown', onJump)
     document.addEventListener('keydown', onJump)
