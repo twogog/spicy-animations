@@ -12,6 +12,16 @@
 
   import { ref } from 'vue';
   
+//   fetch('https://express-api-navy.vercel.app/api/users', {
+// method: 'PUT',
+// headers: {
+// "Content-Type": "application/json",
+// },
+// body: JSON.stringify({name: 'michael'})
+// })
+// .then(r => r.json())
+// .then(r => console.log(r))
+
   const playground = ref(null)
   const ground1 = ref(null)
   const ground2 = ref(null)
