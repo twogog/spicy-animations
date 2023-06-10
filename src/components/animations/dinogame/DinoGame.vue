@@ -1,135 +1,149 @@
 <script setup>
-  import groundImg from '../../../assets/dinoimgs/ground.png'
-  import dinoStatImg from '../../../assets/dinoimgs/dino-stationary.png'
-  import dinoRunImg1 from '../../../assets/dinoimgs/dino-run-0.png'
-  import dinoRunImg2 from '../../../assets/dinoimgs/dino-run-1.png'
-  import dinoLoseImg from '../../../assets/dinoimgs/dino-lose.png'
-  import cactusImg from '../../../assets/dinoimgs/cactus.png'
-  
-  import {updateGround, setupGround} from './ground'
-  import {updateDino, setupDino, getDinoRect} from './dino'
-  import {updateCactus, setupCactus, getCactusRects} from './cactus'
+import groundImg from '../../../assets/dinoimgs/ground.png'
+import dinoStatImg from '../../../assets/dinoimgs/dino-stationary.png'
+import dinoRunImg1 from '../../../assets/dinoimgs/dino-run-0.png'
+import dinoRunImg2 from '../../../assets/dinoimgs/dino-run-1.png'
+import dinoLoseImg from '../../../assets/dinoimgs/dino-lose.png'
+import cactusImg from '../../../assets/dinoimgs/cactus.png'
 
-  import { ref } from 'vue';
-  
-//   fetch('https://express-api-navy.vercel.app/api/users', {
-// method: 'PUT',
-// headers: {
-// "Content-Type": "application/json",
-// },
-// body: JSON.stringify({name: 'michael'})
-// })
-// .then(r => r.json())
-// .then(r => console.log(r))
+import { updateGround, setupGround } from './ground'
+import { updateDino, setupDino, getDinoRect } from './dino'
+import { updateCactus, setupCactus, getCactusRects } from './cactus'
 
-  const playground = ref(null)
-  const ground1 = ref(null)
-  const ground2 = ref(null)
-  const dino = ref(null)
-  
-  const hide = ref(false);
-  const score = ref(0);
+import { useDinoStore } from '../../../stores/dinoUsers.js';
+import { ref, onMounted } from 'vue';
 
-  const localRecord = (() => {
-    try {
-      const storageResult = localStorage.getItem('score-record');
-      if (storageResult) return storageResult
-      return 0;
-    } catch (error) {
-      console.warn(error)
-      alert('You need to share your localStorage for a consistent record writing');
-      return 0;
-    }
-  })()
-  
-  const record = ref(localRecord);
-  
-  function checkRecord() {
-    try {
-      const storageResult = localStorage.getItem('score-record');
-      if (storageResult) {  
-        score.value > storageResult
-          ? localStorage.setItem('score-record', JSON.stringify(score.value)) : ''
-          record.value = localStorage.getItem('score-record');
-      } else {
-        localStorage.setItem('score-record', JSON.stringify(score.value))
-        record.value = score.value;
-      }  
-    } catch (error) {
-      console.warn(error)
-      record.value < score.value ? record.value = score.value : ''
-    }
+const dinoStore = useDinoStore()
+
+const playground = ref(null)
+const ground1 = ref(null)
+const ground2 = ref(null)
+const dino = ref(null)
+
+const hide = ref(false);
+const score = ref(0);
+
+const localRecord = (() => {
+  try {
+    const storageResult = localStorage.getItem('score-record');
+    if (storageResult) return storageResult
+    return 0;
+  } catch (error) {
+    console.warn(error)
+    alert('You need to share your localStorage for a consistent record writing');
+    return 0;
   }
+})()
 
-  let lastTime;
-  let speedScale;
-  const SPEED_BOOST = .00001;
+const newUserForm = ref(null)
+const newUserName = ref(localRecord || null)
+const record = ref(localRecord);
 
-  function update(time) {
-    if(!lastTime) {
-      lastTime = time;
-      window.requestAnimationFrame(update);
-      return;
+function checkRecord() {
+  try {
+    const storageResult = localStorage.getItem('score-record');
+    if (storageResult) {
+      score.value > storageResult
+        ? localStorage.setItem('score-record', JSON.stringify(score.value)) : ''
+      record.value = localStorage.getItem('score-record');
+    } else {
+      localStorage.setItem('score-record', JSON.stringify(score.value))
+      record.value = score.value;
     }
-    const delta = time - lastTime;
-    updateScore(delta)
-    boostSpeed(delta)
-    
-    updateCactus([playground.value, cactusImg], delta, speedScale)
-    updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
-    updateGround([ground1.value, ground2.value], delta, speedScale);
-    if (checkLose(dino.value)) return handleLose(dino.value)
-    
+  } catch (error) {
+    console.warn(error)
+    record.value < score.value ? record.value = score.value : ''
+  }
+}
+
+let lastTime;
+let speedScale;
+const SPEED_BOOST = .00001;
+
+function update(time) {
+  if (!lastTime) {
     lastTime = time;
     window.requestAnimationFrame(update);
+    return;
   }
-  
-  function boostSpeed(delta) {
-    speedScale += delta * SPEED_BOOST
-  }
+  const delta = time - lastTime;
+  updateScore(delta)
+  boostSpeed(delta)
 
-  function updateScore(delta) {
-    score.value += delta * 0.01;
-  }
+  updateCactus([playground.value, cactusImg], delta, speedScale)
+  updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
+  updateGround([ground1.value, ground2.value], delta, speedScale);
+  if (checkLose(dino.value)) return handleLose(dino.value)
 
-  function startGame() {
+  lastTime = time;
+  window.requestAnimationFrame(update);
+}
+
+function boostSpeed(delta) {
+  speedScale += delta * SPEED_BOOST
+}
+
+function updateScore(delta) {
+  score.value += delta * 0.01;
+}
+
+function startGame() {
+  const users = dinoStore.getUsers()
+  const user = users.find(user => user.name === newUserName.value)
+  if (user) {
+    hide.value = true;
     lastTime = null;
     speedScale = 1;
     score.value = 0;
-    hide.value = true;
     setupDino(dino)
     setupCactus(dino)
     setupGround([ground1.value, ground2.value])
     window.requestAnimationFrame(update);
+  } else {
+    newUserForm.value.showModal()
   }
+}
 
-  function checkLose(dino) {
-    const dinoRect = getDinoRect(dino)
-    return getCactusRects().some(cactus => isCollision(cactus, dinoRect))
-  }
+function checkLose(dino) {
+  const dinoRect = getDinoRect(dino)
+  return getCactusRects().some(cactus => isCollision(cactus, dinoRect))
+}
 
-  function isCollision(rect1, rect2) {
-    return (
-      rect1.left < rect2.right &&
-      rect1.top < rect2.bottom &&
-      rect1.right > rect2.left &&
-      rect1.bottom > rect2.top 
-    )
-  }
+function isCollision(rect1, rect2) {
+  return (
+    rect1.left < rect2.right &&
+    rect1.top < rect2.bottom &&
+    rect1.right > rect2.left &&
+    rect1.bottom > rect2.top
+  )
+}
 
-  function handleLose(dino) {
-    checkRecord()
-    dino.src = dinoLoseImg;
-    hide.value = false;
-  }
+function handleLose(dino) {
+  checkRecord()
+  dino.src = dinoLoseImg;
+  hide.value = false;
+}
+
+onMounted(() => {
+  dinoStore.loadUsers().then(r => {
+    const user = r.find(user => user.name === newUserName.value)
+  })
+
+})
 
 </script>
 
 <template>
+  <dialog ref='newUserForm' class="dialog">
+    <form @submit.prevent="">
+      <input v-model="newUserName" required placeholder="your nickname" maxlength="8">
+    </form>
+  </dialog>
+
   <div class='dino-game' ref="playground">
     <span class="record">Your record is: {{ Math.floor(record) }}</span>
     <span class="score">{{ Math.floor(score) }}</span>
-    <p v-if='!hide' class="start-screen" @click="startGame">Click Here To Start</p>
+    <p v-if='!hide' class="start-screen" @click="startGame">Click Here To Start, {{ newUserName }}</p>
     <img ref='ground1' :src=groundImg class="ground">
     <img ref='ground2' :src=groundImg class="ground">
     <img ref='dino' :src='dinoStatImg' class="dino">
@@ -137,37 +151,47 @@
 </template>
 
 <style>
-  .cactus {
+.cactus {
   position: absolute;
   left: calc(var(--left) * 1%);
   height: 20%;
   bottom: 5rem;
-  }
+}
 </style>
 
 <style scoped>
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   user-select: none;
+}
+.dialog {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .dino-game {
   position: relative;
   overflow: hidden;
   color: #fff;
 }
+
 .record {
   position: absolute;
   font-size: 2rem;
   left: 50%;
   top: 5%;
   transform: translate(-50%);
-  width:max-content;
+  width: max-content;
 }
+
 .score {
   position: absolute;
   bottom: 50%;
   right: 1%;
 }
+
 .start-screen {
   font-size: 2rem;
   position: absolute;
@@ -176,6 +200,7 @@
   width: max-content;
   transform: translate(-50%, -50%);
 }
+
 .ground {
   --left: 0;
   position: absolute;
@@ -183,6 +208,7 @@
   width: 800%;
   left: calc(var(--left) * 1%);
 }
+
 .dino {
   --bottom: 20;
   position: absolute;
