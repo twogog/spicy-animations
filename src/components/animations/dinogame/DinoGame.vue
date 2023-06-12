@@ -14,7 +14,7 @@ import { useDinoStore } from '../../../stores/dinoUsers.js';
 import { ref, onMounted } from 'vue';
 
 const dinoStore = useDinoStore()
-
+dinoStore.addUser({name: 'jasdf', password: '123', email: '23@m'}).then(r => console.log(r))
 const playground = ref(null)
 const ground1 = ref(null)
 const ground2 = ref(null)
@@ -23,21 +23,9 @@ const dino = ref(null)
 const hide = ref(false);
 const score = ref(0);
 
-const localRecord = (() => {
-  try {
-    const storageResult = localStorage.getItem('score-record');
-    if (storageResult) return storageResult
-    return 0;
-  } catch (error) {
-    console.warn(error)
-    alert('You need to share your localStorage for a consistent record writing');
-    return 0;
-  }
-})()
-
 const newUserForm = ref(null)
-const newUserName = ref(localRecord || null)
-const record = ref(localRecord);
+const newUserName = ref(null)
+const record = ref(0);
 
 function checkRecord() {
   try {

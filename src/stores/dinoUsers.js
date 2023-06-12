@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-const API_URL = 'https://express-api-navy.vercel.app/api/users';
+const API_URL = 'https://express-api-git-authorization-twogog.vercel.app/api/';
 
 export const useDinoStore = defineStore('dino', () => {
   const users = ref([])
@@ -12,7 +12,7 @@ export const useDinoStore = defineStore('dino', () => {
 
   async function loadUsers() {
     try {
-      const response = await fetch(API_URL)
+      const response = await fetch(API_URL + 'users')
       if (!response.ok) throw new Error('bad response')
       users.value = await response.json()
       return users.value;
@@ -21,14 +21,14 @@ export const useDinoStore = defineStore('dino', () => {
     }
   }
 
-  async function addUser(name) {
+  async function addUser(user) {
     try {
-      const response = await fetch(API_URL, {
-        method: 'PUT',
+      const response = await fetch(API_URL + 'registration', {
+        method: 'POST',
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name })
+        body: JSON.stringify(user)
       })
       if (!response.ok) throw new Error('bad response')
       users.value = await response.json()
