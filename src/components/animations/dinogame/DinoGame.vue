@@ -15,8 +15,8 @@ import { ref, onMounted } from 'vue';
 
 const dinoStore = useDinoStore()
 
-const user = {name: 'dd', password: '123', email: '23@m'}
-dinoStore.addUser(user).then(r => console.log(r))
+const user = {name: '3332', password: 'sdf'}
+dinoStore.checkUser(user).then(r => console.log(r))
 
 const playground = ref(null)
 const ground1 = ref(null)

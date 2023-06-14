@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-const API_URL = 'https://express-api-git-authorization-twogog.vercel.app/api/';
+const API_URL = 'http://localhost:3000/api/';
 
 export const useDinoStore = defineStore('dino', () => {
   const users = ref([])
@@ -13,7 +13,7 @@ export const useDinoStore = defineStore('dino', () => {
   async function loadUsers() {
     try {
       const response = await fetch(API_URL + 'users')
-      if (!response.ok) throw new Error('bad response')
+      if (!response.ok) throw new Error(await response.text())
       users.value = await response.json()
       return users.value;
     } catch (error) {
@@ -30,7 +30,24 @@ export const useDinoStore = defineStore('dino', () => {
         },
         body: JSON.stringify(user)
       })
-      if (!response.ok) throw new Error('bad response')
+      if (!response.ok) throw new Error(await response.text())
+      users.value = await response.json()
+      return users.value;
+    } catch (error) {
+      console.warn(error.message)
+    }
+  }
+
+  async function checkUser(user) {
+    try {
+      const response = await fetch(API_URL + 'login', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user)
+      })
+      if (!response.ok) throw new Error(await response.text())
       users.value = await response.json()
       return users.value;
     } catch (error) {
@@ -40,14 +57,14 @@ export const useDinoStore = defineStore('dino', () => {
 
   async function addScore(user) {
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(API_URL + 'score', {
         method: 'PUT',
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(user)
       })
-      if (!response.ok) throw new Error('bad response')
+      if (!response.ok) throw new Error(await response.text())
       users.value = await response.json()
       return users.value;
     } catch (error) {
@@ -55,5 +72,5 @@ export const useDinoStore = defineStore('dino', () => {
     }
   }
 
-  return { users, addUser, addScore, loadUsers, getUsers }
+  return { users, addUser, addScore, loadUsers, getUsers, checkUser }
 })
