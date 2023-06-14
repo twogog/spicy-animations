@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-const API_URL = 'http://localhost:3000/api/';
+const API_URL = 'https://express-api-git-authorization-twogog.vercel.app/api/';
 
 export const useDinoStore = defineStore('dino', () => {
   const users = ref([])
@@ -32,6 +32,7 @@ export const useDinoStore = defineStore('dino', () => {
       })
       if (!response.ok) throw new Error(await response.text())
       users.value = await response.json()
+      console.log(users.value)
       return users.value;
     } catch (error) {
       console.warn(error.message)
@@ -49,6 +50,7 @@ export const useDinoStore = defineStore('dino', () => {
       })
       if (!response.ok) throw new Error(await response.text())
       users.value = await response.json()
+      console.log(users.value)
       return users.value;
     } catch (error) {
       console.warn(error.message)

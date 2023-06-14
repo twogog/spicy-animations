@@ -15,9 +15,6 @@ import { ref, onMounted } from 'vue';
 
 const dinoStore = useDinoStore()
 
-const user = {name: '3332', password: 'sdf'}
-dinoStore.checkUser(user).then(r => console.log(r))
-
 const playground = ref(null)
 const ground1 = ref(null)
 const ground2 = ref(null)
@@ -26,26 +23,14 @@ const dino = ref(null)
 const hide = ref(false);
 const score = ref(0);
 
-const newUserForm = ref(null)
+const newUserDialogue = ref(null)
+const newUserForm = ref('registration')
 const newUserName = ref(null)
-const record = ref(0);
+const newUserPassword = ref(null)
+const newUserEmail = ref(null)
 
-function checkRecord() {
-  try {
-    const storageResult = localStorage.getItem('score-record');
-    if (storageResult) {
-      score.value > storageResult
-        ? localStorage.setItem('score-record', JSON.stringify(score.value)) : ''
-      record.value = localStorage.getItem('score-record');
-    } else {
-      localStorage.setItem('score-record', JSON.stringify(score.value))
-      record.value = score.value;
-    }
-  } catch (error) {
-    console.warn(error)
-    record.value < score.value ? record.value = score.value : ''
-  }
-}
+let currentUser;
+const record = ref(currentUser?.score || 0);
 
 let lastTime;
 let speedScale;
@@ -80,7 +65,7 @@ function updateScore(delta) {
 
 function startGame() {
   const users = dinoStore.getUsers()
-  const user = users.find(user => user.name === newUserName.value)
+  const user = currentUser?.name || users.find(user => user.name === newUserName.value)
   if (user) {
     hide.value = true;
     lastTime = null;
@@ -91,7 +76,7 @@ function startGame() {
     setupGround([ground1.value, ground2.value])
     window.requestAnimationFrame(update);
   } else {
-    newUserForm.value.showModal()
+    newUserGate()
   }
 }
 
@@ -115,26 +100,56 @@ function handleLose(dino) {
   hide.value = false;
 }
 
-onMounted(() => {
-  dinoStore.loadUsers().then(r => {
-    const user = r.find(user => user.name === newUserName.value)
-  })
+function checkRecord() {
+  if (currentUser.score < score.value) {
+    dinoStore.addScore({ ...currentUser, score: score.value })
+  }
+}
 
+function newUserGate() {
+  newUserDialogue.value.showModal()
+}
+
+function createUser() {
+  const newUser = { name: newUserName.value, email: newUserEmail.value, password: newUserPassword.value }
+  console.log(newUser)
+  dinoStore.addUser(newUser).then(user => console.log(user))
+  newUserDialogue.value.close()
+}
+
+function checkUser() {
+  const newUser = { name: newUserName.value, password: newUserPassword.value }
+  dinoStore.checkUser(newUser).then(user => console.log(user))
+  newUserDialogue.value.close()
+}
+
+onMounted(() => {
+  dinoStore.loadUsers()
 })
 
 </script>
 
 <template>
-  <dialog ref='newUserForm' class="dialog">
-    <form @submit.prevent="">
-      <input v-model="newUserName" required placeholder="your nickname" maxlength="8">
+  <dialog ref='newUserDialogue' class="dialog">
+    <form @submit.prevent="newUserForm === 'login' ? createUser() : checkUser()">
+      <div class="body">
+        <input v-model="newUserName" required placeholder="your nickname" maxlength="8">
+        <input v-model="newUserPassword" type='password' required placeholder="your password" maxlength="12">
+        <input v-if='newUserForm !== "registration"' v-model="newUserEmail" type='email' required placeholder="your email"
+          maxlength="30">
+      </div>
+      <div class="footer">
+        <button type="button" @click="newUserForm = newUserForm === 'login' ? 'registration' : 'login'">{{ newUserForm
+        }}</button>
+        <button type='submit'>submit</button>
+      </div>
     </form>
   </dialog>
 
   <div class='dino-game' ref="playground">
     <span class="record">Your record is: {{ Math.floor(record) }}</span>
     <span class="score">{{ Math.floor(score) }}</span>
-    <p v-if='!hide' class="start-screen" @click="startGame">Click Here To Start, {{ newUserName }}</p>
+    <p v-if='!hide' class="start-screen" @click="startGame">Click Here To Start {{ currentUser?.name || newUserName }}</p>
     <img ref='ground1' :src=groundImg class="ground">
     <img ref='ground2' :src=groundImg class="ground">
     <img ref='dino' :src='dinoStatImg' class="dino">
@@ -157,11 +172,34 @@ onMounted(() => {
   box-sizing: border-box;
   user-select: none;
 }
+
 .dialog {
+  --padding: 1rem;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  border-radius: 1rem;
 }
+
+form .body {
+  padding: var(--padding);
+  display: grid;
+  grid-row-gap: .5rem;
+}
+
+form input {
+  padding: .5rem 0 .5rem .5rem;
+}
+
+form .footer {
+  padding: var(--padding);
+}
+
+form .footer button:first-child {
+  margin-right: 1rem;
+  padding: 0 .5rem;
+}
+
 .dino-game {
   position: relative;
   overflow: hidden;
