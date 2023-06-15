@@ -6,12 +6,14 @@ import dinoRunImg2 from '../../../assets/dinoimgs/dino-run-1.png'
 import dinoLoseImg from '../../../assets/dinoimgs/dino-lose.png'
 import cactusImg from '../../../assets/dinoimgs/cactus.png'
 
+import { toast } from 'vue3-toastify'
+
 import { updateGround, setupGround } from './ground'
 import { updateDino, setupDino, getDinoRect } from './dino'
 import { updateCactus, setupCactus, getCactusRects } from './cactus'
 
-import { useDinoStore } from '../../../stores/dinoUsers.js';
-import { ref, onMounted } from 'vue';
+import { useDinoStore } from '../../../stores/dinoUsers.js'
+import { ref, onMounted } from 'vue'
 
 const dinoStore = useDinoStore()
 
@@ -20,8 +22,8 @@ const ground1 = ref(null)
 const ground2 = ref(null)
 const dino = ref(null)
 
-const hide = ref(false);
-const score = ref(0);
+const hide = ref(false)
+const score = ref(0)
 
 const newUserDialogue = ref(null)
 const newUserForm = ref('registration')
@@ -29,30 +31,30 @@ const newUserName = ref(null)
 const newUserPassword = ref(null)
 const newUserEmail = ref(null)
 
-let currentUser;
-const record = ref(currentUser?.score || 0);
+let currentUser
+const record = ref(currentUser?.score || 0)
 
-let lastTime;
-let speedScale;
-const SPEED_BOOST = .00001;
+let lastTime
+let speedScale
+const SPEED_BOOST = 0.00001
 
 function update(time) {
   if (!lastTime) {
-    lastTime = time;
-    window.requestAnimationFrame(update);
-    return;
+    lastTime = time
+    window.requestAnimationFrame(update)
+    return
   }
-  const delta = time - lastTime;
+  const delta = time - lastTime
   updateScore(delta)
   boostSpeed(delta)
 
   updateCactus([playground.value, cactusImg], delta, speedScale)
   updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
-  updateGround([ground1.value, ground2.value], delta, speedScale);
+  updateGround([ground1.value, ground2.value], delta, speedScale)
   if (checkLose(dino.value)) return handleLose(dino.value)
 
-  lastTime = time;
-  window.requestAnimationFrame(update);
+  lastTime = time
+  window.requestAnimationFrame(update)
 }
 
 function boostSpeed(delta) {
@@ -60,21 +62,21 @@ function boostSpeed(delta) {
 }
 
 function updateScore(delta) {
-  score.value += delta * 0.01;
+  score.value += delta * 0.01
 }
 
 function startGame() {
   const users = dinoStore.getUsers()
-  const user = currentUser?.name || users.find(user => user.name === newUserName.value)
+  const user = currentUser?.name || users.find((user) => user.name === newUserName.value)
   if (user) {
-    hide.value = true;
-    lastTime = null;
-    speedScale = 1;
-    score.value = 0;
+    hide.value = true
+    lastTime = null
+    speedScale = 1
+    score.value = 0
     setupDino(dino)
     setupCactus(dino)
     setupGround([ground1.value, ground2.value])
-    window.requestAnimationFrame(update);
+    window.requestAnimationFrame(update)
   } else {
     newUserGate()
   }
@@ -82,7 +84,7 @@ function startGame() {
 
 function checkLose(dino) {
   const dinoRect = getDinoRect(dino)
-  return getCactusRects().some(cactus => isCollision(cactus, dinoRect))
+  return getCactusRects().some((cactus) => isCollision(cactus, dinoRect))
 }
 
 function isCollision(rect1, rect2) {
@@ -96,13 +98,25 @@ function isCollision(rect1, rect2) {
 
 function handleLose(dino) {
   checkRecord()
-  dino.src = dinoLoseImg;
-  hide.value = false;
+  dino.src = dinoLoseImg
+  hide.value = false
 }
 
 function checkRecord() {
   if (currentUser.score < score.value) {
+    record.value = score.value
     dinoStore.addScore({ ...currentUser, score: score.value })
+      .then(users => {
+        const place = users
+          .slice()
+          .sort((a, b) => b.score - a.score)
+          .findIndex(s => s.name === currentUser.name) + 1;
+        toast.success(`You're now in ${place} place!`, {
+          autoClose: 3000,
+          position: 'top-center'
+        })
+      })
+      .catch((e) => console.warn(e.message))
   }
 }
 
@@ -111,48 +125,84 @@ function newUserGate() {
 }
 
 function createUser() {
-  const newUser = { name: newUserName.value, email: newUserEmail.value, password: newUserPassword.value }
-  console.log(newUser)
-  dinoStore.addUser(newUser).then(user => console.log(user))
-  newUserDialogue.value.close()
+  const newUser = {
+    name: newUserName.value,
+    email: newUserEmail.value,
+    password: newUserPassword.value
+  }
+  dinoStore
+    .addUser(newUser)
+    .then((_) => {
+      newUserDialogue.value.close()
+      toast.success('success!', { autoClose: 2000 })
+      const users = dinoStore.getUsers()
+      currentUser = users.find((u) => u.name === newUser.name)
+    })
+    .catch((err) => toast.error(err.message, { autoClose: 2000 }))
 }
 
 function checkUser() {
   const newUser = { name: newUserName.value, password: newUserPassword.value }
-  dinoStore.checkUser(newUser).then(user => console.log(user))
-  newUserDialogue.value.close()
+  dinoStore
+    .checkUser(newUser)
+    .then((_) => {
+      newUserDialogue.value.close()
+      toast.success('logged', { autoClose: 2000 })
+      const users = dinoStore.getUsers()
+      currentUser = users.find((u) => u.name === newUser.name)
+      record.value = currentUser.score
+    })
+    .catch((err) => toast.error(err.message, { autoClose: 2000 }))
 }
 
 onMounted(() => {
   dinoStore.loadUsers()
 })
-
 </script>
 
 <template>
-  <dialog ref='newUserDialogue' class="dialog">
+  <dialog ref="newUserDialogue" class="dialog">
     <form @submit.prevent="newUserForm === 'login' ? createUser() : checkUser()">
       <div class="body">
-        <input v-model="newUserName" required placeholder="your nickname" maxlength="8">
-        <input v-model="newUserPassword" type='password' required placeholder="your password" maxlength="12">
-        <input v-if='newUserForm !== "registration"' v-model="newUserEmail" type='email' required placeholder="your email"
-          maxlength="30">
+        <input v-model="newUserName" required placeholder="your nickname" maxlength="8" />
+        <input
+          v-model="newUserPassword"
+          type="password"
+          required
+          placeholder="your password"
+          minlength="5"
+          maxlength="12"
+        />
+        <input
+          v-if="newUserForm !== 'registration'"
+          v-model="newUserEmail"
+          type="email"
+          required
+          placeholder="your email"
+          maxlength="30"
+        />
       </div>
       <div class="footer">
-        <button type="button" @click="newUserForm = newUserForm === 'login' ? 'registration' : 'login'">{{ newUserForm
-        }}</button>
-        <button type='submit'>submit</button>
+        <button
+          type="button"
+          @click="newUserForm = newUserForm === 'login' ? 'registration' : 'login'"
+        >
+          {{ newUserForm }}
+        </button>
+        <button type="submit">submit</button>
       </div>
     </form>
   </dialog>
 
-  <div class='dino-game' ref="playground">
+  <div class="dino-game" ref="playground">
     <span class="record">Your record is: {{ Math.floor(record) }}</span>
     <span class="score">{{ Math.floor(score) }}</span>
-    <p v-if='!hide' class="start-screen" @click="startGame">Click Here To Start {{ currentUser?.name || newUserName }}</p>
-    <img ref='ground1' :src=groundImg class="ground">
-    <img ref='ground2' :src=groundImg class="ground">
-    <img ref='dino' :src='dinoStatImg' class="dino">
+    <p v-if="!hide" class="start-screen" @click="startGame">
+      Click Here To Start {{ currentUser?.name || newUserName }}
+    </p>
+    <img ref="ground1" :src="groundImg" class="ground" />
+    <img ref="ground2" :src="groundImg" class="ground" />
+    <img ref="dino" :src="dinoStatImg" class="dino" />
   </div>
 </template>
 
@@ -184,20 +234,23 @@ onMounted(() => {
 form .body {
   padding: var(--padding);
   display: grid;
-  grid-row-gap: .5rem;
+  grid-row-gap: 0.5rem;
 }
 
 form input {
-  padding: .5rem 0 .5rem .5rem;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  border: 1px solid grey;
 }
 
 form .footer {
   padding: var(--padding);
 }
-
+form .footer button {
+  padding: 0 0.5rem;
+}
 form .footer button:first-child {
   margin-right: 1rem;
-  padding: 0 .5rem;
+  padding: 0 0.5rem;
 }
 
 .dino-game {

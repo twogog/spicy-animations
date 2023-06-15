@@ -2,6 +2,8 @@
   import MiniContainer from './components/MiniContainer.vue';
   import MainTheme from './components/animations/MainTheme.vue';
   import {animations} from './components/animations/index'
+
+  import 'vue3-toastify/dist/index.css'
 </script>
 
 <template>

@@ -36,6 +36,7 @@ export const useDinoStore = defineStore('dino', () => {
       return users.value;
     } catch (error) {
       console.warn(error.message)
+      throw new Error(error.message)
     }
   }
 
@@ -50,10 +51,10 @@ export const useDinoStore = defineStore('dino', () => {
       })
       if (!response.ok) throw new Error(await response.text())
       users.value = await response.json()
-      console.log(users.value)
       return users.value;
     } catch (error) {
       console.warn(error.message)
+      throw new Error(error.message)
     }
   }
 
@@ -71,6 +72,7 @@ export const useDinoStore = defineStore('dino', () => {
       return users.value;
     } catch (error) {
       console.warn(error.message)
+      throw new Error(error.message)
     }
   }
 
