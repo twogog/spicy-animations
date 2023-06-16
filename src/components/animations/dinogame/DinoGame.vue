@@ -39,22 +39,28 @@ let speedScale
 const SPEED_BOOST = 0.00001
 
 function update(time) {
-  if (!lastTime) {
+  const visibility = document.visibilityState
+  
+  if (visibility === 'visible') {
+    if (!lastTime) {
+      lastTime = time
+      window.requestAnimationFrame(update)
+      return
+    }
+    const delta = time - lastTime
+    updateScore(delta)
+    boostSpeed(delta)
+
+    updateCactus([playground.value, cactusImg], delta, speedScale)
+    updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
+    updateGround([ground1.value, ground2.value], delta, speedScale)
+    if (checkLose(dino.value)) return handleLose(dino.value)
+
     lastTime = time
     window.requestAnimationFrame(update)
-    return
+  } else {
+    window.requestAnimationFrame(update)
   }
-  const delta = time - lastTime
-  updateScore(delta)
-  boostSpeed(delta)
-
-  updateCactus([playground.value, cactusImg], delta, speedScale)
-  updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
-  updateGround([ground1.value, ground2.value], delta, speedScale)
-  if (checkLose(dino.value)) return handleLose(dino.value)
-
-  lastTime = time
-  window.requestAnimationFrame(update)
 }
 
 function boostSpeed(delta) {
@@ -105,12 +111,14 @@ function handleLose(dino) {
 function checkRecord() {
   if (currentUser.score < score.value) {
     record.value = score.value
-    dinoStore.addScore({ ...currentUser, score: score.value })
-      .then(users => {
-        const place = users
-          .slice()
-          .sort((a, b) => b.score - a.score)
-          .findIndex(s => s.name === currentUser.name) + 1;
+    dinoStore
+      .addScore({ ...currentUser, score: score.value })
+      .then((users) => {
+        const place =
+          users
+            .slice()
+            .sort((a, b) => b.score - a.score)
+            .findIndex((s) => s.name === currentUser.name) + 1
         toast.success(`You're now in ${place} place!`, {
           autoClose: 3000,
           position: 'top-center'
@@ -157,6 +165,9 @@ function checkUser() {
 
 onMounted(() => {
   dinoStore.loadUsers()
+  document.addEventListener("visibilitychange", () => {
+    console.log(document.visibilityState);
+  });
 })
 </script>
 
