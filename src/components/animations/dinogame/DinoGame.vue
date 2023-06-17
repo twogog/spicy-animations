@@ -201,6 +201,7 @@ onMounted(() => {
           {{ newUserForm }}
         </button>
         <button type="submit">submit</button>
+        <button type="button">skip</button>
       </div>
     </form>
   </dialog>
@@ -255,13 +256,11 @@ form input {
 }
 
 form .footer {
+  display: flex;
+  gap: 10px;
   padding: var(--padding);
 }
 form .footer button {
-  padding: 0 0.5rem;
-}
-form .footer button:first-child {
-  margin-right: 1rem;
   padding: 0 0.5rem;
 }
 

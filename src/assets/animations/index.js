@@ -3,5 +3,5 @@ import { futuristicButton } from './FuturisticButton.js'
 import { quickTextAnimation } from './QuickTextAnimation.js'
 import { dinoGame } from './DinoGame.js'
 
-export const animations = [null, wavyCirle, futuristicButton,
-  quickTextAnimation, dinoGame];
+export const animations = [null, dinoGame, futuristicButton,
+  quickTextAnimation, wavyCirle];
