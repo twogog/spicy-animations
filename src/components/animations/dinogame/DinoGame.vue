@@ -238,7 +238,7 @@ onMounted(() => {
 
 .dialog {
   --padding: 1rem;
-  top: 10%;
+  top: 30%;
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 1rem;
