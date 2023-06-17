@@ -16,7 +16,7 @@ let positionMap = {
 function rollUp() {
   position = position === 'hidden' ? 'visible' : 'hidden'
   leaderBoard.value.style.transform = positionMap[position]
-  if (position === 'hidden') {
+  if (position === 'visible') {
     const rating = dinoStore
       .getUsers()
       .slice()
