@@ -6,6 +6,8 @@ import dinoRunImg2 from '../../../assets/dinoimgs/dino-run-1.png'
 import dinoLoseImg from '../../../assets/dinoimgs/dino-lose.png'
 import cactusImg from '../../../assets/dinoimgs/cactus.png'
 
+import LeaderBoard from './LeaderBoard.vue'
+
 import { toast } from 'vue3-toastify'
 
 import { updateGround, setupGround } from './ground'
@@ -31,36 +33,30 @@ const newUserName = ref(null)
 const newUserPassword = ref(null)
 const newUserEmail = ref(null)
 
-let currentUser
-const record = ref(currentUser?.score || 0)
+let currentUser = ref(null)
+const record = ref(currentUser.value?.score || 0)
 
 let lastTime
 let speedScale
 const SPEED_BOOST = 0.00001
 
 function update(time) {
-  const visibility = document.visibilityState
-  
-  if (visibility === 'visible') {
-    if (!lastTime) {
-      lastTime = time
-      window.requestAnimationFrame(update)
-      return
-    }
-    const delta = time - lastTime
-    updateScore(delta)
-    boostSpeed(delta)
-
-    updateCactus([playground.value, cactusImg], delta, speedScale)
-    updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
-    updateGround([ground1.value, ground2.value], delta, speedScale)
-    if (checkLose(dino.value)) return handleLose(dino.value)
-
+  if (!lastTime) {
     lastTime = time
     window.requestAnimationFrame(update)
-  } else {
-    window.requestAnimationFrame(update)
+    return
   }
+  const delta = time - lastTime
+  updateScore(delta)
+  boostSpeed(delta)
+
+  updateCactus([playground.value, cactusImg], delta, speedScale)
+  updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
+  updateGround([ground1.value, ground2.value], delta, speedScale)
+  if (checkLose(dino.value)) return handleLose(dino.value)
+
+  lastTime = time
+  window.requestAnimationFrame(update)
 }
 
 function boostSpeed(delta) {
@@ -73,7 +69,7 @@ function updateScore(delta) {
 
 function startGame() {
   const users = dinoStore.getUsers()
-  const user = currentUser?.name || users.find((user) => user.name === newUserName.value)
+  const user = currentUser.value?.name || users.find((user) => user.name === newUserName.value)
   if (user) {
     hide.value = true
     lastTime = null
@@ -109,16 +105,16 @@ function handleLose(dino) {
 }
 
 function checkRecord() {
-  if (currentUser.score < score.value) {
+  if (currentUser.value.score < score.value) {
     record.value = score.value
     dinoStore
-      .addScore({ ...currentUser, score: score.value })
+      .addScore({ ...currentUser.value, score: score.value })
       .then((users) => {
         const place =
           users
             .slice()
             .sort((a, b) => b.score - a.score)
-            .findIndex((s) => s.name === currentUser.name) + 1
+            .findIndex((s) => s.name === currentUser.value.name) + 1
         toast.success(`You're now in ${place} place!`, {
           autoClose: 3000,
           position: 'top-center'
@@ -140,11 +136,11 @@ function createUser() {
   }
   dinoStore
     .addUser(newUser)
-    .then((_) => {
+    .then(() => {
       newUserDialogue.value.close()
       toast.success('success!', { autoClose: 2000 })
       const users = dinoStore.getUsers()
-      currentUser = users.find((u) => u.name === newUser.name)
+      currentUser.value = users.find((u) => u.name === newUser.name)
     })
     .catch((err) => toast.error(err.message, { autoClose: 2000 }))
 }
@@ -153,22 +149,26 @@ function checkUser() {
   const newUser = { name: newUserName.value, password: newUserPassword.value }
   dinoStore
     .checkUser(newUser)
-    .then((_) => {
+    .then(() => {
       newUserDialogue.value.close()
       toast.success('logged', { autoClose: 2000 })
       const users = dinoStore.getUsers()
-      currentUser = users.find((u) => u.name === newUser.name)
-      record.value = currentUser.score
+      currentUser.value = users.find((u) => u.name === newUser.name)
+      record.value = currentUser.value.score
     })
     .catch((err) => toast.error(err.message, { autoClose: 2000 }))
 }
 
+function checkVisibility() {
+  if (document.visibilityState === 'hidden') lastTime = null
+}
+
 onMounted(() => {
+  document.removeEventListener('visibilitychange', checkVisibility)
+  document.addEventListener('visibilitychange', checkVisibility)
   dinoStore.loadUsers()
-  document.addEventListener("visibilitychange", () => {
-    console.log(document.visibilityState);
-  });
 })
+
 </script>
 
 <template>
@@ -206,6 +206,7 @@ onMounted(() => {
   </dialog>
 
   <div class="dino-game" ref="playground">
+    <LeaderBoard :currentName=currentUser />
     <span class="record">Your record is: {{ Math.floor(record) }}</span>
     <span class="score">{{ Math.floor(score) }}</span>
     <p v-if="!hide" class="start-screen" @click="startGame">
