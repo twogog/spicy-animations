@@ -46,7 +46,7 @@ onMounted(() => {
           }}
         </li>
       </ol>
-      <button @click="rollUp" @touchstart="rollUp" class="activator"></button>
+      <button @click.stop="rollUp" @touchstart.stop="rollUp" class="activator"></button>
     </div>
   </div>
 </template>
