@@ -36,6 +36,7 @@ const newUserEmail = ref(null)
 let currentUser = ref(null)
 const record = ref(currentUser.value?.score || 0)
 
+let skipped = false
 let lastTime
 let speedScale
 const SPEED_BOOST = 0.00001
@@ -70,7 +71,7 @@ function updateScore(delta) {
 function startGame() {
   const users = dinoStore.getUsers()
   const user = currentUser.value?.name || users.find((user) => user.name === newUserName.value)
-  if (user) {
+  if (user || skipped) {
     hide.value = true
     lastTime = null
     speedScale = 1
@@ -105,6 +106,11 @@ function handleLose(dino) {
 }
 
 function checkRecord() {
+  if (skipped) {
+    record.value = record.value < score.value
+      ? score.value : record.value;
+    return;
+  }
   if (currentUser.value.score < score.value) {
     record.value = score.value
     dinoStore
@@ -126,6 +132,13 @@ function checkRecord() {
 
 function newUserGate() {
   newUserDialogue.value.showModal()
+}
+
+function skipDialogue() {
+  newUserDialogue.value.close()
+  skipped = true;
+  newUserName.value = ''
+  startGame()
 }
 
 function createUser() {
@@ -201,7 +214,7 @@ onMounted(() => {
           {{ newUserForm }}
         </button>
         <button type="submit">submit</button>
-        <button type="button">skip</button>
+        <button @click='skipDialogue' type="button">skip</button>
       </div>
     </form>
   </dialog>
@@ -211,7 +224,8 @@ onMounted(() => {
     <span class="record">Your record is: {{ Math.floor(record) }}</span>
     <span class="score">{{ Math.floor(score) }}</span>
     <p v-if="!hide" class="start-screen" @click="startGame">
-      Click Here To Start {{ currentUser?.name || newUserName }}
+      Click Here To Start
+      <span>{{ currentUser?.name || newUserName }}</span>
     </p>
     <img ref="ground1" :src="groundImg" class="ground" />
     <img ref="ground2" :src="groundImg" class="ground" />
@@ -292,6 +306,12 @@ form .footer button {
   left: 50%;
   width: max-content;
   transform: translate(-50%, -50%);
+}
+
+.start-screen span {
+  display: block;
+  text-align: center;
+  color: green;
 }
 
 .ground {
