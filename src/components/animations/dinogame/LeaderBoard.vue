@@ -16,6 +16,13 @@ let positionMap = {
 function rollUp() {
   position = position === 'hidden' ? 'visible' : 'hidden'
   leaderBoard.value.style.transform = positionMap[position]
+  if (position === 'hidden') {
+    const rating = dinoStore
+      .getUsers()
+      .slice()
+      .sort((a, b) => b.score - a.score)
+    users.value = rating
+  }
 }
 
 onMounted(() => {
