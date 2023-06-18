@@ -188,9 +188,9 @@ onMounted(() => {
   <dialog ref="newUserDialogue" class="dialog">
     <form @submit.prevent="newUserForm === 'login' ? createUser() : checkUser()">
       <div class="body">
-        <input v-model="newUserName" required placeholder="your nickname" maxlength="8" />
+        <input v-model.trim="newUserName" required placeholder="your nickname" maxlength="8" />
         <input
-          v-model="newUserPassword"
+          v-model.trim="newUserPassword"
           type="password"
           required
           placeholder="your password"
@@ -199,7 +199,7 @@ onMounted(() => {
         />
         <input
           v-if="newUserForm !== 'registration'"
-          v-model="newUserEmail"
+          v-model.trim="newUserEmail"
           type="email"
           required
           placeholder="your email"
