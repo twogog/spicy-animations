@@ -52,7 +52,7 @@ function update(time) {
   boostSpeed(delta)
 
   updateCactus([playground.value, cactusImg], delta, speedScale)
-  updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta, speedScale)
+  updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta)
   updateGround([ground1.value, ground2.value], delta, speedScale)
   if (checkLose(dino.value)) return handleLose(dino.value)
 

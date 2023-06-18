@@ -1,26 +1,32 @@
 import {getCustomProperty, incrementCustomProperty, setCustomProperty} from './helpers.js'
 
-const FRAME_TIME = 100;
-const DINO_FRAME_COUNT = 2;
 const GRAVITY = 0.002;
 const JUMP_SPEED = 0.45;
 const isPhone = /android|iphone/i.test(navigator.userAgent)
 
 let isJumping
-let currentFrameTime
-let dinoFrame
+
+let frameLimit
+let cycle
+const handleRunStats = {
+  runFrameImg: 0,
+  dinoFrame: frameLimit - 1,
+}
+
 let yVelocity
 
-export function updateDino(dinoElements, delta, speedScale) {
+export function updateDino(dinoElements, delta) {
   const [dino] = dinoElements;
-  handleRun(dinoElements, delta, speedScale)
+  handleRun(dinoElements)
   handleJump(dino, delta)
 }
 
 export function setupDino(dino) {
   isJumping = false;
-  dinoFrame = 0;  
-  currentFrameTime = 0;
+  frameLimit = 6;
+  cycle = 1;
+  handleRunStats.dinoFrame = frameLimit - 1;
+  handleRunStats.runFrameImg = 0;
   yVelocity = 0;
   setCustomProperty(dino.value, '--bottom', '20')
 
@@ -33,7 +39,7 @@ export function setupDino(dino) {
   }
 }
 
-function handleRun(dinoElements, delta, speedScale) {
+function handleRun(dinoElements) {
   const [dino, dinoStatImg, dinoRunImg1, dinoRunImg2] = 
   dinoElements;
   if (isJumping) {
@@ -41,12 +47,20 @@ function handleRun(dinoElements, delta, speedScale) {
     return;  
   }
 
-  if (currentFrameTime >= FRAME_TIME) {
-    dinoFrame = (dinoFrame + 1) % DINO_FRAME_COUNT
-    dino.value.src = dinoFrame ? dinoRunImg2 : dinoRunImg1
-    currentFrameTime -= FRAME_TIME
+  if (handleRunStats.runFrameImg === 1 && handleRunStats.dinoFrame === (frameLimit - 1)) {
+    dino.value.src = dinoRunImg1
+    handleRunStats.runFrameImg = 0;
+  } else if (handleRunStats.dinoFrame === (frameLimit - 1)) {
+    dino.value.src = dinoRunImg2
+    handleRunStats.runFrameImg = 1;
   }
-  currentFrameTime += delta * speedScale
+  handleRunStats.dinoFrame += 1;
+  if (handleRunStats.dinoFrame === frameLimit) handleRunStats.dinoFrame = 0;
+  cycle += 1;
+  if (cycle % 1000 === 0) {
+    frameLimit === 1 ? '' : frameLimit -= 1;
+    handleRunStats.dinoFrame = frameLimit - 1;
+  }
 }
 
 function handleJump(dino, delta) {
