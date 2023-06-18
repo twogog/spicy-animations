@@ -13,7 +13,8 @@ Check on Vercel https://spicy-animations.vercel.app/
 ## Stack
 - Vue (vite)
 - Pinia
-- something
+- Serveless for restapi (vercel)
+- backend - https://github.com/twogog/express-api
 
 ## Available Scripts
 
