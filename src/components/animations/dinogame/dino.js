@@ -59,8 +59,10 @@ function handleJump(dino, delta) {
   yVelocity -= GRAVITY * delta;
 }
 
-function onJump({code}) {
+function onJump(e) {
+  const {code} = e;
   if (!isPhone) {
+    if (code === 'Space' || code === 'ArrowUp') e.preventDefault();
     if (code !== 'Space' && code !== 'ArrowUp' || isJumping) return
   } else if (isJumping) return
   
