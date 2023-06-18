@@ -11,7 +11,7 @@ function addCurrentAnimation() {
 <template>
   <div class='container'>
 <slot>Here is some animation</slot>
-<button @click='addCurrentAnimation'>copy</button>
+<button @click='addCurrentAnimation'>copy code</button>
   </div>
 </template>
 
