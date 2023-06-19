@@ -8,11 +8,8 @@ let isJumping
 
 let frameLimit
 let cycle
-const handleRunStats = {
-  runFrameImg: 0,
-  dinoFrame: frameLimit - 1,
-}
-
+let runFrameImg
+let dinoFrame
 let yVelocity
 
 export function updateDino(dinoElements, delta) {
@@ -25,8 +22,8 @@ export function setupDino(dino) {
   isJumping = false;
   frameLimit = 6;
   cycle = 1;
-  handleRunStats.dinoFrame = frameLimit - 1;
-  handleRunStats.runFrameImg = 0;
+  dinoFrame = frameLimit - 1;
+  runFrameImg = 0;
   yVelocity = 0;
   setCustomProperty(dino.value, '--bottom', '20')
 
@@ -47,20 +44,20 @@ function handleRun(dinoElements) {
     return;  
   }
 
-  if (handleRunStats.runFrameImg === 1 && handleRunStats.dinoFrame === (frameLimit - 1)) {
+  if (runFrameImg === 1 && dinoFrame === (frameLimit - 1)) {
     dino.value.src = dinoRunImg1
-    handleRunStats.runFrameImg = 0;
-  } else if (handleRunStats.dinoFrame === (frameLimit - 1)) {
+    runFrameImg = 0;
+  } else if (dinoFrame === (frameLimit - 1)) {
     dino.value.src = dinoRunImg2
-    handleRunStats.runFrameImg = 1;
+    runFrameImg = 1;
   }
-  handleRunStats.dinoFrame += 1;
-  if (handleRunStats.dinoFrame === frameLimit) handleRunStats.dinoFrame = 0;
-  // cycle += 1;
-  // if (cycle % 100 === 0) {
-  //   frameLimit === 2 ? '' : frameLimit -= 1;
-  //   handleRunStats.dinoFrame = frameLimit - 1;
-  // }
+  dinoFrame += 1;
+  if (dinoFrame === frameLimit) dinoFrame = 0;
+  cycle += 1;
+  if (cycle % 100 === 0) {
+    frameLimit === 2 ? '' : frameLimit -= 1;
+    dinoFrame = frameLimit - 1;
+  }
 }
 
 function handleJump(dino, delta) {
