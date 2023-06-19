@@ -13,6 +13,11 @@ const handleRunStats = {
   dinoFrame: frameLimit - 1,
 }
 
+const test = {
+  first: 0,
+  second: 0
+}
+
 let yVelocity
 
 export function updateDino(dinoElements, delta) {
@@ -46,11 +51,13 @@ function handleRun(dinoElements) {
     dino.value.src = dinoStatImg
     return;  
   }
-
+  
   if (handleRunStats.runFrameImg === 1 && handleRunStats.dinoFrame === (frameLimit - 1)) {
     dino.value.src = dinoRunImg1
+    test.first += 1
     handleRunStats.runFrameImg = 0;
   } else if (handleRunStats.dinoFrame === (frameLimit - 1)) {
+    test.second += 1
     dino.value.src = dinoRunImg2
     handleRunStats.runFrameImg = 1;
   }
@@ -61,6 +68,7 @@ function handleRun(dinoElements) {
     frameLimit === 4 ? '' : frameLimit -= 1;
     handleRunStats.dinoFrame = frameLimit - 1;
   }
+  console.log(test)
 }
 
 function handleJump(dino, delta) {
