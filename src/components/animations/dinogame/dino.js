@@ -57,8 +57,8 @@ function handleRun(dinoElements) {
   handleRunStats.dinoFrame += 1;
   if (handleRunStats.dinoFrame === frameLimit) handleRunStats.dinoFrame = 0;
   cycle += 1;
-  if (cycle % 100 === 0) {
-    frameLimit === 1 ? '' : frameLimit -= 1;
+  if (cycle % 1000 === 0) {
+    frameLimit === 2 ? '' : frameLimit -= 1;
     handleRunStats.dinoFrame = frameLimit - 1;
   }
 }
