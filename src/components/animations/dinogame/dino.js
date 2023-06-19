@@ -85,5 +85,5 @@ function onJump(e) {
 }
 
 export function getDinoRect(dino) {
-  return []; dino.getBoundingClientRect()
+  return dino.getBoundingClientRect()
 }

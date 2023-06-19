@@ -54,7 +54,7 @@ function update(time) {
   updateCactus([playground.value, cactusImg], delta, speedScale)
   updateDino([dino, dinoStatImg, dinoRunImg1, dinoRunImg2], delta)
   updateGround([ground1.value, ground2.value], delta, speedScale)
-  if (checkLose(dino.value)) return handleLose(dino.value)
+  // if (checkLose(dino.value)) return handleLose(dino.value)
 
   lastTime = time
   window.requestAnimationFrame(update)
