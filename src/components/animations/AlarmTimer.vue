@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 const showTimer = ref(false)
 const showSettings = ref(true)
@@ -9,40 +9,72 @@ let timer = null
 
 const progressBar = ref(null)
 
+onMounted(() => {
+  canvas.ctx = progressBar.value.getContext('2d')
+  canvas.width = progressBar.value.width
+  canvas.height = progressBar.value.height
+  canvas.ctx.strokeStyle = 'green'
+  canvas.ctx.lineWidth = 10
+})
+
+const canvas = reactive({
+  ctx: null,
+  width: null,
+  height: null
+})
+
 const hms = reactive({
   hours: null,
   minutes: null,
   seconds: null,
-  purpose: null
+  purpose: null,
+  angle: 0,
+  paused: false
 })
 
-function startTimer() {
-  const ctx = progressBar.value.getContext('2d')
-  ctx.strokeStyle = 'green'
-  ctx.lineWidth = 10
-  const canvasWidth = progressBar.value.width
-  const canvasHeight = progressBar.value.height
+function resetHMS(hms) {
+  hms.hours = null
+  hms.minutes = null
+  hms.seconds = null
+  hms.purpose = null
+  hms.angle = 0
+  hms.paused = false
+}
 
-  hms.purpose = minutesInput.value * 60000 // hours, minutes, seconds
+function startTimer(e, ifpaused) {
+  if (!ifpaused) hms.purpose = minutesInput.value * 60000 // hours, minutes, seconds
   let step = 360 / (minutesInput.value * 60)
-  let angle = 270 - step
+  if (!hms.angle) hms.angle = 270 - step
 
   showTimer.value = true
   showSettings.value = false
 
   timer = setInterval(() => {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-    ctx.beginPath()
-    ctx.arc(canvasWidth / 2, canvasHeight / 2, 80, toRadians(270), toRadians((angle += step)))
-    ctx.stroke()
-
+    draw(step)
     timerRush(hms, timer)
   }, 1000)
 }
 
+function draw(step) {
+  canvas.ctx.clearRect(0, 0, canvas.width, canvas.height)
+  canvas.ctx.beginPath()
+  canvas.ctx.arc(
+    canvas.width / 2,
+    canvas.height / 2,
+    80,
+    toRadians(270),
+    toRadians((hms.angle += step))
+  )
+  canvas.ctx.stroke()
+}
+
 function timerRush(hms, timer) {
-  if (hms.purpose === 0) clearInterval(timer)
   const currentDate = new Date(hms.purpose)
+  if (hms.purpose === 0) {
+    hms.seconds = currentDate.getSeconds()
+    clearInterval(timer)
+    return
+  }
   hms.purpose -= 1000
   hms.hours = currentDate.getUTCHours()
   hms.minutes = currentDate.getMinutes()
@@ -52,6 +84,25 @@ function timerRush(hms, timer) {
 function toRadians(degrees) {
   const pi = Math.PI
   return degrees * (pi / 180)
+}
+
+function resetTimer() {
+  clearInterval(timer)
+  canvas.ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  resetHMS(hms)
+
+  showTimer.value = false
+  showSettings.value = true
+}
+
+function pauseTimer() {
+  hms.paused = hms.paused ? false : true
+  if (hms.paused) {
+    clearInterval(timer)
+  } else {
+    startTimer('vueref', true)
+  }
 }
 </script>
 
@@ -70,11 +121,13 @@ function toRadians(degrees) {
   </form>
   <div v-show="showTimer" class="timer">
     <canvas ref="progressBar" width="300" height="250"></canvas>
+    <button v-if="hms.hours !== null" @click="pauseTimer" class="pause">P</button>
     <time v-if="hms.hours !== null" ref="timerFrame">{{
       `${hms.hours.toString().padStart(2, 0)}:${hms.minutes.toString().padStart(2, 0)}:${hms.seconds
         .toString()
         .padStart(2, 0)}`
     }}</time>
+    <button v-if="hms.hours !== null" @click="resetTimer" class="reset">R</button>
   </div>
 </template>
 
@@ -96,11 +149,22 @@ function toRadians(degrees) {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 .timer time {
   font-size: 3rem;
   color: white;
 }
+.reset,
+.pause {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 10;
+  padding: 0 3px 0 3px;
+}
+
 canvas {
   position: absolute;
 }
