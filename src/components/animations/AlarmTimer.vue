@@ -11,14 +11,17 @@ let voices
 
 const progressBar = ref(null)
 
+const robot = window.speechSynthesis
+robot.onvoiceschanged = () => {
+  voices = robot.getVoices().filter((v) => v.lang.includes('ru') || v.lang.includes('en'))
+}
+
 onMounted(() => {
   canvas.ctx = progressBar.value.getContext('2d')
   canvas.width = progressBar.value.width
   canvas.height = progressBar.value.height
   canvas.ctx.strokeStyle = 'green'
   canvas.ctx.lineWidth = 10
-  speechSynthesis.removeEventListener('voiceschanged', getVoices)
-  speechSynthesis.addEventListener('voiceschanged', getVoices)
 })
 
 const canvas = reactive({
@@ -47,7 +50,7 @@ function resetHMS(hms) {
 
 function startTimer(e, ifpaused) {
   if (!ifpaused) hms.purpose = secondsInput.value * 1000 // hours, minutes, seconds
-  let step = 360 / (secondsInput.value)
+  let step = 360 / secondsInput.value
   if (!hms.angle) hms.angle = 270 - step
 
   showTimer.value = true
@@ -110,10 +113,6 @@ function pauseTimer() {
   }
 }
 
-function getVoices() {
-  voices = speechSynthesis.getVoices().filter((v) => v.lang.includes('ru') || v.lang.includes('en'))
-}
-
 function talkPhrase(phrase) {
   const speaker = new SpeechSynthesisUtterance(phrase)
   if (/[a-zA-Z]/.test(phrase)) {
@@ -121,7 +120,7 @@ function talkPhrase(phrase) {
   } else {
     const [first, second, third] = voices.filter((v) => v.lang.includes('ru'))
     const choose = third || second || first
-    speaker.voice = choose;
+    speaker.voice = choose
   }
 
   speechSynthesis.speak(speaker)
