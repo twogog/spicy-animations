@@ -49,7 +49,7 @@ function resetHMS(hms) {
 }
 
 function startTimer(e, ifpaused) {
-  const speaker = new SpeechSynthesisUtterance(phrase.value) // needs for mobile activation
+  speechSynthesis.speak(new SpeechSynthesisUtterance())// needs for mobile activation
   if (!ifpaused) hms.purpose = secondsInput.value * 1000 // hours, minutes, seconds
   let step = 360 / secondsInput.value
   if (!hms.angle) hms.angle = 270 - step
@@ -59,7 +59,7 @@ function startTimer(e, ifpaused) {
 
   timer = setInterval(() => {
     draw(step)
-    timerRush(hms, timer, speaker)
+    timerRush(hms, timer)
   }, 1000)
 }
 
@@ -76,14 +76,13 @@ function draw(step) {
   canvas.ctx.stroke()
 }
 
-function timerRush(hms, timer, speaker) {
+function timerRush(hms, timer) {
   const currentDate = new Date(hms.purpose)
   if (hms.purpose === 0) {
     hms.seconds = currentDate.getSeconds()
     clearInterval(timer)
     
-    configPhrase(speaker, phrase.value)
-    speechSynthesis.speak(speaker)
+    sayPhrase(phrase.value)
     return
   }
   hms.purpose -= 1000
@@ -116,7 +115,8 @@ function pauseTimer() {
   }
 }
 
-function configPhrase(speaker, phrase) {
+function sayPhrase(phrase) {
+  const speaker = new SpeechSynthesisUtterance(phrase)
   if (/[a-zA-Z]/.test(phrase)) {
     speaker.voice = voices.filter((v) => v.lang.includes('en'))[0]
     speaker.lang = 'en-US';
@@ -126,6 +126,7 @@ function configPhrase(speaker, phrase) {
     speaker.voice = choose
     speaker.lang = 'ru-RU'
   }
+  speechSynthesis.speak(speaker)
 }
 </script>
 
