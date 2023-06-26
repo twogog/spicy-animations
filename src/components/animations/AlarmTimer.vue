@@ -173,6 +173,10 @@ function talkPhrase(phrase) {
   text-align: center;
   outline: none;
 }
+
+.settings input:nth-child(2) {
+  order: 1;
+}
 .timer {
   position: relative;
   display: flex;
@@ -180,6 +184,7 @@ function talkPhrase(phrase) {
   justify-content: center;
   flex-direction: column;
 }
+
 .timer time {
   font-size: 3rem;
   color: white;
