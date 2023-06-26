@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 
 const showTimer = ref(false)
 const showSettings = ref(true)
-const minutesInput = ref(null)
+const secondsInput = ref(null)
 const phrase = ref(null)
 
 let timer = null
@@ -46,8 +46,8 @@ function resetHMS(hms) {
 }
 
 function startTimer(e, ifpaused) {
-  if (!ifpaused) hms.purpose = minutesInput.value * 60000 // hours, minutes, seconds
-  let step = 360 / (minutesInput.value * 60)
+  if (!ifpaused) hms.purpose = secondsInput.value * 1000 // hours, minutes, seconds
+  let step = 360 / (secondsInput.value)
   if (!hms.angle) hms.angle = 270 - step
 
   showTimer.value = true
@@ -118,7 +118,11 @@ function talkPhrase(phrase) {
   const speaker = new SpeechSynthesisUtterance(phrase)
   if (/[a-zA-Z]/.test(phrase)) {
     speaker.voice = voices.filter((v) => v.lang.includes('en'))[0]
-  } else speaker.voice = voices.filter((v) => v.lang.includes('ru'))[2]
+  } else {
+    const [first, second, third] = voices.filter((v) => v.lang.includes('ru'))
+    const choose = third || second || first
+    speaker.voice = choose;
+  }
 
   speechSynthesis.speak(speaker)
 }
@@ -127,14 +131,14 @@ function talkPhrase(phrase) {
 <template>
   <form v-show="showSettings" @submit.prevent="startTimer" class="settings">
     <input
-      v-model="minutesInput"
+      v-model="secondsInput"
       type="number"
       min="1"
-      max="600"
+      max="86399"
       required
-      name="minutes"
-      id="minutes"
-      placeholder="minutes"
+      name="seconds"
+      id="seconds"
+      placeholder="seconds"
     />
     <input
       v-model.trim="phrase"
