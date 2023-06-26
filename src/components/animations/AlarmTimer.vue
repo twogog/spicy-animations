@@ -4,8 +4,10 @@ import { ref, reactive, onMounted } from 'vue'
 const showTimer = ref(false)
 const showSettings = ref(true)
 const minutesInput = ref(null)
+const phrase = ref(null)
 
 let timer = null
+let voices;
 
 const progressBar = ref(null)
 
@@ -15,6 +17,8 @@ onMounted(() => {
   canvas.height = progressBar.value.height
   canvas.ctx.strokeStyle = 'green'
   canvas.ctx.lineWidth = 10
+
+  voices = speechSynthesis.getVoices().filter((v) => v.lang.includes('ru') || v.lang.includes('en'))
 })
 
 const canvas = reactive({
@@ -73,6 +77,7 @@ function timerRush(hms, timer) {
   if (hms.purpose === 0) {
     hms.seconds = currentDate.getSeconds()
     clearInterval(timer)
+    talkPhrase(phrase.value)
     return
   }
   hms.purpose -= 1000
@@ -104,6 +109,15 @@ function pauseTimer() {
     startTimer('vueref', true)
   }
 }
+
+function talkPhrase(phrase) {
+  const speaker = new SpeechSynthesisUtterance(phrase);
+  if (/[a-bA-B]/g.test(phrase)) {
+    speaker.voice = voices.filter(v => v.lang.includes('en'))[0]
+  } else speaker.voice = voices.filter(v => v.lang.includes('ru'))[0]
+  
+  speechSynthesis.speak(speaker)
+}
 </script>
 
 <template>
@@ -117,6 +131,14 @@ function pauseTimer() {
       name="minutes"
       id="minutes"
       placeholder="minutes"
+    />
+    <button type="submit">Go</button>
+    <input
+      v-model.trim="phrase"
+      id="phrase"
+      name="phrase"
+      required
+      placeholder="choose your phrase"
     />
   </form>
   <div v-show="showTimer" class="timer">
@@ -134,8 +156,10 @@ function pauseTimer() {
 <style scoped>
 .settings {
   display: flex;
+  gap: 1rem;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .settings input {
@@ -143,6 +167,7 @@ function pauseTimer() {
   padding: 2rem;
   border-radius: 50%;
   text-align: center;
+  outline: none;
 }
 .timer {
   position: relative;
@@ -156,7 +181,8 @@ function pauseTimer() {
   color: white;
 }
 .reset,
-.pause {
+.pause,
+.settings button {
   display: flex;
   align-items: center;
   justify-content: center;
