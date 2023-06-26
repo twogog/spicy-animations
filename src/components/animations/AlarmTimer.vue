@@ -49,7 +49,7 @@ function resetHMS(hms) {
 }
 
 function startTimer(e, ifpaused) {
-  speechSynthesis.speak(new SpeechSynthesisUtterance(''))
+  new SpeechSynthesisUtterance('')
   if (!ifpaused) hms.purpose = secondsInput.value * 1000 // hours, minutes, seconds
   let step = 360 / secondsInput.value
   if (!hms.angle) hms.angle = 270 - step
