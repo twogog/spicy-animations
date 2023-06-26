@@ -49,7 +49,7 @@ function resetHMS(hms) {
 }
 
 function startTimer(e, ifpaused) {
-  speechSynthesis.speak(new SpeechSynthesisUtterance())// needs for mobile activation
+  robot.speak(new SpeechSynthesisUtterance()) // needs for mobile activation
   if (!ifpaused) hms.purpose = secondsInput.value * 1000 // hours, minutes, seconds
   let step = 360 / secondsInput.value
   if (!hms.angle) hms.angle = 270 - step
@@ -126,7 +126,7 @@ function sayPhrase(phrase) {
     speaker.voice = choose
     speaker.lang = 'ru-RU'
   }
-  speechSynthesis.speak(speaker)
+  robot.speak(speaker)
 }
 </script>
 
