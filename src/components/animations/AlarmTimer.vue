@@ -7,7 +7,7 @@ const minutesInput = ref(null)
 const phrase = ref(null)
 
 let timer = null
-let voices;
+let voices
 
 const progressBar = ref(null)
 
@@ -17,8 +17,8 @@ onMounted(() => {
   canvas.height = progressBar.value.height
   canvas.ctx.strokeStyle = 'green'
   canvas.ctx.lineWidth = 10
-  speechSynthesis.removeEventListener("voiceschanged", getVoices)
-  speechSynthesis.addEventListener("voiceschanged", getVoices)
+  speechSynthesis.removeEventListener('voiceschanged', getVoices)
+  speechSynthesis.addEventListener('voiceschanged', getVoices)
 })
 
 const canvas = reactive({
@@ -46,8 +46,6 @@ function resetHMS(hms) {
 }
 
 function startTimer(e, ifpaused) {
-  talkPhrase(phrase.value)
-
   if (!ifpaused) hms.purpose = minutesInput.value * 60000 // hours, minutes, seconds
   let step = 360 / (minutesInput.value * 60)
   if (!hms.angle) hms.angle = 270 - step
@@ -79,6 +77,7 @@ function timerRush(hms, timer) {
   if (hms.purpose === 0) {
     hms.seconds = currentDate.getSeconds()
     clearInterval(timer)
+    talkPhrase(phrase.value)
     return
   }
   hms.purpose -= 1000
@@ -116,11 +115,11 @@ function getVoices() {
 }
 
 function talkPhrase(phrase) {
-  const speaker = new SpeechSynthesisUtterance(phrase);
+  const speaker = new SpeechSynthesisUtterance(phrase)
   if (/[a-zA-Z]/.test(phrase)) {
-    speaker.voice = voices.filter(v => v.lang.includes('en'))[0]
-  } else speaker.voice = voices.filter(v => v.lang.includes('ru'))[2]
-  
+    speaker.voice = voices.filter((v) => v.lang.includes('en'))[0]
+  } else speaker.voice = voices.filter((v) => v.lang.includes('ru'))[2]
+
   speechSynthesis.speak(speaker)
 }
 </script>
@@ -137,7 +136,6 @@ function talkPhrase(phrase) {
       id="minutes"
       placeholder="minutes"
     />
-    <button type="submit">Go</button>
     <input
       v-model.trim="phrase"
       id="phrase"
@@ -145,6 +143,7 @@ function talkPhrase(phrase) {
       required
       placeholder="choose your phrase"
     />
+    <button type="submit">Go</button>
   </form>
   <div v-show="showTimer" class="timer">
     <canvas ref="progressBar" width="300" height="250"></canvas>
