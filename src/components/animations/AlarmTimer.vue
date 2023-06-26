@@ -114,8 +114,8 @@ function pauseTimer() {
 }
 
 function talkPhrase(phrase) {
-  alert(voices)
   const speaker = new SpeechSynthesisUtterance(phrase)
+  window.prompt(voices)
   if (/[a-zA-Z]/.test(phrase)) {
     speaker.voice = voices.filter((v) => v.lang.includes('en'))[0]
   } else {
